@@ -3,14 +3,28 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from alert import app, db, lm
 from models import *
 from urllib2 import urlopen
+import urllib2
+import xmltodict
 
 @lm.user_loader
 def load_user(id):
         return Student.query.get(int(id))
 
+def predictions(bus, stop):
+    url = 'http://webservices.nextbus.com/service/publicXMLFeed?a=rutgers&command=prediction&r=' + bus + '&s=' + stop
+    print url
+    file = urllib2.urlopen(url)
+    data = file.read()
+    file.close()
+
+    data = xmltodict.parse(data)
+    return data
+
+
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
+    predictions('a', 'scott')
 
     return render_template('index.html')
 
