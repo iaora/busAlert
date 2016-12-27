@@ -1,4 +1,4 @@
-URL-Shortener Flask App
+Bus Alerter at Rutgers University Flask App
 
 To get set up on the project:
 
@@ -17,9 +17,9 @@ Fedora: yum install python-migrate
 
 Run the following commands:
 - "sudo mysql"
-- "create database url;"
-- "create user 'url'@'localhost' identified by 'url';"
-- "grant all privileges on url.* to 'url'@'localhost';"
+- "create database alert;"
+- "create user 'alert'@'localhost' identified by 'alert';"
+- "grant all privileges on alert.* to 'alert'@'localhost';"
 - "flush privileges;"
 Quit out of mysql with "quit". Then run:
 - "./migrate.py db init"

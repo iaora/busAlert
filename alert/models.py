@@ -1,4 +1,5 @@
 from alert import app, db
+from flask.ext.login import UserMixin
 
 
 class Class(db.Model):
@@ -11,7 +12,7 @@ class Class(db.Model):
     recitation = db.Column(db.DateTime, nullable=False)
 
 
-class Student(db.Model):
+class Student(db.Model, UserMixin):
     __tablename__ = 'students'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name =  db.Column(db.String(25), nullable=False)
@@ -21,9 +22,10 @@ class Student(db.Model):
 class Schedule(db.Model):
     __tablename__ = 'schedules'
     id = db.Column(db.Integer, primary_key=True)
-    student = db.Column(db.String(25), db.ForeignKey('students.id'), nullable=False)
+    student = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
     classID = db.Column(db.String(15), db.ForeignKey('classes.courseNum'), nullable=False)
     busStop = db.Column(db.String(15), nullable=False)
+    bus = db.Column(db.String(2), db.ForeignKey('busses.name'), nullable=False)
 
 
 class Bus(db.Model):

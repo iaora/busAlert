@@ -3,6 +3,7 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
+from flask.ext.login import LoginManager
 import logging
 
 # Creates global Flask app object
@@ -17,5 +18,8 @@ migrate = Migrate(app, db)
 # Creates global Manager object and allows migrate.py to work
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+lm = LoginManager(app)
+lm.login_view = 'home'
 
 from alert import views, models

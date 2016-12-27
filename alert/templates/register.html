@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Login or Signup {% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+
+
+
+  <!-- User should not be here -> Error -->
+  <br>
+  {% if current_user.is_authenticated %}
+    <h2>You are already logged in</h2>
+  {% else  %}
+
+    <form class="form-inline" action="{{ url_for('register') }}" name="register" method="POST">
+      <div class="form-group">
+        <input class="form-control" name="name" placeholder="Name" type="text">
+      </div>
+      <br>
+      <div class="form-group">
+        <input class="form-control" name="number" placeholder="Number" type="text">
+      </div>
+        <br>
+        <br>
+      <input name="login_or_signup" class="btn btn-secondary"type="submit" value="login">
+      <input name="login_or_signup" class="btn btn-secondary"  type="submit" value="signup">
+    </form>
+    <br>
+  {% endif %}
+
+{% endblock %}
