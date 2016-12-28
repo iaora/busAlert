@@ -12,9 +12,11 @@
   <hr class="intro-divider">
   <ul class="list-inline intro-social-buttons">
   <!-- Create buttons of active buses-->
+  {% for i in buses %}
     <li>
-      <a href="#" class="btn btn-default btn-lg"><i class="fa fa-bus fa-fw"></i> <span class="network-name">A</span></a>
+      <a href="/schedules/{{i}}" class="btn btn-default btn-lg"><i class="fa fa-bus fa-fw"></i> <span class="network-name">{{i}}</span></a>
     </li>
+  {% endfor %}
   </ul>
 
 {% endblock %}

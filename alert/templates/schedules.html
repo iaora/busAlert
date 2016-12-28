@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}<i class="fa fa-bus fa-fw"></i> schedule for <br>{{busName}}
+{% if data is not defined %}
+<br><br><br>
+  <h2 style="color: red;">There is no data for {{busName}}</h2>
+{% endif %}
+
+
+{% endblock %}
+{% block header %}
+  {{ super() }}
+{% endblock %}
+
+{% block info %}
+
+
+{% if data is defined %}
+  <div class="content-section-a">
+
+      <div class="container">
+        <div class="row">
+          {% for i in data %}
+            <h2 style="text-align: center;">{{i['title']}}</h2>
+            <hr class="intro-divider">
+              <ul class="list-inline" style="text-align:center;">
+                <li>
+                  {% for k in i['predictions'] %}
+                      <h4>{{k['minutes']}} min</h4>
+                  {% endfor %}
+                </li>
+              </ul>
+          {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

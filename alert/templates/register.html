@@ -7,7 +7,9 @@
 
 {% block content %}
 
-
+  {% if msg %}
+    <h4 style="color: red;">{{msg}}</h4>
+  {% endif %}
 
   <!-- User should not be here -> Error -->
   <br>
