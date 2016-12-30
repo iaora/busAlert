@@ -19,4 +19,18 @@
   {% endfor %}
   </ul>
 
+  {% if current_user.is_authenticated %}
+    <hr class="intro-divider">
+    <div class="row">
+      <h2>Create a new alert</h2>
+      <form>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Class ID</label>
+          <input class="form-control" name="classID"  placeholder="Class ID">
+          <small id="classID" class="form-text text-muted" style="color: #fff;">Ex: 01:198:111:01 for Intro to CS section 1</small>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+
 {% endblock %}

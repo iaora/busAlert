@@ -18,7 +18,32 @@ def load_user(id):
 @app.route('/', methods=['POST', 'GET'])
 def home():
     activeBuses = actives()
+    loadSOC()
     return render_template('index.html', buses=activeBuses)
+
+
+def loadSOC():
+    url = 'http://sis.rutgers.edu/soc/courses.json?subject=198&semester=12017&campus=NB&level=U'
+    response = urllib.urlopen(url)
+    data = json.loads(response.read())
+    for course in data:
+        courseNum = '198:' + course['courseNumber']
+        for section in course['sections']:
+            sectionNum = section['number']
+            for info in section['meetingTimes']:
+                building = info['buildingCode']
+                campus = info['campusName']
+                startTime = info['startTime']
+                endTime = info['endTime']
+                meetingDay = info['meetingDay']
+                pm = info['pmCode']
+                if courseNum is None or sectionNum is None or building is None or campus is None or startTime is None or endTime is None or meetingDay is None or pm is None:
+                    continue
+                newClass = Classes(courseNum=courseNum, sectionNum=sectionNum, startTime=startTime, endTime=endTime, pm=pm, meetingDay=meetingDay, campus=campus, building=building)
+                db.session.add(newClass)
+                db.session.commit()
+                print "added" + courseNum + ":" + sectionNum
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -73,7 +98,8 @@ def schedule(bus):
 
 @app.route('/profile/<number>', methods=['GET','POST'])
 def profile(number):
-    return render_template('index.html')
+
+    return render_template('profile.html')
 
 
 #Helper method to get predictions of a specific bus + stop
