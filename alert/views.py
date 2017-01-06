@@ -8,6 +8,7 @@ import urllib2, urllib, json, xmltodict
 from pytz import timezone
 #from jinja2 import Environment
 
+#Loader to user for authorizing log in. Need this up here or else it would give some weird error because try to use Student before it's made or something
 @lm.user_loader
 def load_user(id):
         return Student.query.get(int(id))
@@ -17,11 +18,41 @@ def load_user(id):
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
-    activeBuses = actives()
+    if request.method == 'GET':
+        activeBuses = actives()
+        #loadDB()
+        return render_template('index.html', buses=activeBuses)
+
+def loadDB():
+    url = 'http://webservices.nextbus.com/service/publicXMLFeed?a=rutgers&command=routeConfig'
+    data = getDict(url)
+    loadBuses(data)
+    loadStops(data)
     loadSOC()
-    return render_template('index.html', buses=activeBuses)
 
 
+def loadBuses(data):
+    for route in data['body']['route']:
+        #Add all busses to the Bus table
+        print route['@title']
+        print route['@tag']
+        bus = Bus(name=route['@tag'], running='F')
+        db.session.add(bus)
+        db.session.commit()
+
+#Add all stops to the BusStop table
+def loadStops(data):
+    for route in data['body']['route']:
+        bus = Bus.query.filter_by(name=route['@tag']).first()
+        print bus
+        for stop in route['stop']:
+            busstop = BusStop(name=stop['@tag'], bus=bus.name)
+            db.session.add(busstop)
+            db.session.commit()
+
+
+
+#Method used to load all classes of a certain section into my DB. Only need to be done once per semester. This should be its own python file.. but import errors :( I'll fix it soon
 def loadSOC():
     url = 'http://sis.rutgers.edu/soc/courses.json?subject=198&semester=12017&campus=NB&level=U'
     response = urllib.urlopen(url)
@@ -74,32 +105,52 @@ def register():
             print "user successfully logged in"
             return redirect(url_for('home'))
 
+
 #load schedules of specific buses in JSON response
-@app.route('/schedules/<bus>', methods=['GET','POST'])
+@app.route('/schedules/<bus>', methods=['GET'])
 def schedule(bus):
-    url = 'http://runextbus.herokuapp.com/route/' + bus
-    response = urllib.urlopen(url)
-    data = json.loads(response.read())
+    if request.method == 'GET':
+        url = 'http://runextbus.herokuapp.com/route/' + bus
+        response = urllib.urlopen(url)
+        data = json.loads(response.read())
 
-    #get time to be returned and print out estimate time
-    #time = datetime.now(timezone('EST'))
-    #print time.hour
-    #print time.minute
-    #print time + timedelta(minutes = 10)
-    for i in data:
-        if i == 'name':
-            return render_template('schedules.html', busName=bus)
-    #for i in data:
-    #    print i['title']
-    #    for k in i['predictions']:
-    #        print k['minutes']
-    return render_template('schedules.html', busName=bus, data=data)
+        #get time to be returned and print out estimate time
+        #time = datetime.now(timezone('EST'))
+        #print time.hour
+        #print time.minute
+        #print time + timedelta(minutes = 10)
+        for i in data:
+            if i == 'name':
+                return render_template('schedules.html', busName=bus)
+        #for i in data:
+        #    print i['title']
+        #    for k in i['predictions']:
+        #        print k['minutes']
+        return render_template('schedules.html', busName=bus, data=data)
 
 
-@app.route('/profile/<number>', methods=['GET','POST'])
-def profile(number):
+#Profile route to edit schedules
+@app.route('/u/<number>', methods=['GET', 'POST'])
+def prof(number):
+    if request.method == 'GET':
+        person = Student.query.filter_by(number=number).first()
+        #if person's profile is not in the DB/invalid number
+        if person is None:
+            print 'Person is none'
+            return render_template('profile.html', number=number,  msg='This phone number does not exist')
+        
+        list_of_schedules = Schedule.query.filter_by(student=person.id).all()
+        #if person does not have any schedules saved yet
+        if list_of_schedules is None or not list_of_schedules:
+            print 'Schedule is none'
+            return render_template('profile.html', number=number, msg='You currently have no schedules saved')
 
-    return render_template('profile.html')
+        #Send schedule to front end to be displayed
+        print 'LOL WHY'
+        return render_template('profile.html', number=number, schedules=list_of_schedules)
+    if request.method == 'POST':
+        return render_template('profile.html')
+
 
 
 #Helper method to get predictions of a specific bus + stop
@@ -135,6 +186,15 @@ def actives():
         activeBuses.append(results[i]['@routeTag'])
     #Remove duplicates of the list and put into alphabetic order
     activeBuses = removeDup(sorted(activeBuses))
+
+    #update DB to switch running flag to T if it's in the activeBuses list. Else, set the running flag to F
+    for u in Bus.query: #Query all bus objects from Bus table (!!! SO COOL)
+        if u.name in activeBuses:
+            print '      ' + u.name
+            u.running = 'T'
+            db.session.commit()
+        else:
+            u.running = 'F'
 
     return activeBuses
 

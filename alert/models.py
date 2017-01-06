@@ -26,12 +26,19 @@ class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
     classID = db.Column(db.Integer, db.ForeignKey('classes.id'), nullable=False)
-    busStop = db.Column(db.String(15), nullable=False)
-    bus = db.Column(db.String(2), db.ForeignKey('busses.name'), nullable=False)
-
+    timePref = db.Column(db.Integer, nullable=False)
+    bus = db.Column(db.String(20), db.ForeignKey('busses.name'), nullable=False)
+    stop = db.Column(db.Integer, db.ForeignKey('stops.id'), nullable=False)
 
 class Bus(db.Model):
     __tablename__ = 'busses'
-    id = db.Column(db.Integer,)
-    name = db.Column(db.String(2), primary_key=True, unique=True)
+    name = db.Column(db.String(30), primary_key=True, unique=True)
+    running = db.Column(db.String(1), nullable=False)
+
+
+class BusStop(db.Model):
+    __tablename__ = 'stops'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False)
+    bus = db.Column(db.String(30), db.ForeignKey('busses.name'), nullable=False)
 

@@ -29,6 +29,33 @@
           <input class="form-control" name="classID"  placeholder="Class ID">
           <small id="classID" class="form-text text-muted" style="color: #fff;">Ex: 01:198:111:01 for Intro to CS section 1</small>
         </div>
+        <div class="form-group">
+          <label for="sel1">Select Buses:</label>
+          <select class="form-control" id="sel1">
+            {% for i in buses %}
+              <option>{{i}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sel1">Select Stop:</label>
+          <select class="form-control" id="sel1">
+            {% for i in buses %}
+              <option>{{i}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sel1">Select Time:</label>
+          <select class="form-control" id="sel1">
+            {% for i in buses %}
+              <option>{{i}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="" style="background-color: Transparent; border: none;"  name="selection" type="submit" value="post_like">
+          <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+        </button>
       </form>
     </div>
   {% endif %}

@@ -51,7 +51,7 @@
                     <li>
                       {% if current_user.is_authenticated %}
                         <li>
-                          <a href="{{ url_for('profile', number=current_user.number) }}" target="_self">Profile</a>
+                          <a href="{{ url_for('prof', number=current_user.number) }}" target="_self">Profile</a>
                         </li>
                         <li>
                           <a href="{{ url_for('logout') }}" target="_self">Logout</a>
@@ -92,10 +92,10 @@
     {% block info %}{% endblock %}
 
     <!-- jQuery -->
-    <script src="js/jquery.js"></script>
+    <script src="../static/js/jquery.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
 
 </body>
 
