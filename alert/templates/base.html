@@ -78,6 +78,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="intro-message">
+                      {% block status %}{% endblock %}
                       <h1>{% block title %}{% endblock %}</h1>
                       {% block content %}{% endblock %}
                     </div>

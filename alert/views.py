@@ -3,7 +3,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from alert import app, db, lm
 from models import *
 from urllib2 import urlopen
-#from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 import urllib2, urllib, json, xmltodict
 from pytz import timezone
 #from jinja2 import Environment
@@ -18,11 +18,57 @@ def load_user(id):
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
-    if request.method == 'GET':
-        activeBuses = actives()
-        #loadDB()
-        return render_template('index.html', buses=activeBuses)
+    activeBuses = actives()
+    stops = BusStop.query
+    classes = Classes.query
+    msg = ''
 
+    if request.method == 'POST':
+        #Get front-end fields
+        #Split '198:111.40' into '198:111' and '40' to query the Classes object to get the unique ID of that item
+        bus = request.form.get('bus')
+        course = request.form.get('classID')
+        timePref = request.form.get('time')
+        stop = request.form.get('stop')
+
+        if 'Select' in bus or 'Select' in course or 'Select' in timePref or 'Select' in bus:
+            print "ERROR IN FIELD"
+            return render_template('index.html', error='Error! You forgot to select 1 or more fields', classes=classes, stops=stops, buses=activeBuses)
+            
+
+        
+        #Split values to be used later
+        course = course.split('.')
+        timePref = timePref.split(' ')
+
+        #Get the ID of the that specific class
+        classID = Classes.query.filter_by(courseNum=course[0], sectionNum=course[1]).first()
+
+        #Get bus ID
+        stop = BusStop.query.filter_by(name=stop).first().id
+
+        #Calculate time for alert to ring
+        #Add PM or AM depending on when the class starts
+        time = classID.startTime+'PM' if classID.pm == 'P' else classID.startTime+'AM'
+        #Convert String->datetime obj
+        timeObj = datetime.strptime(time, '%I%M%p')
+        #Subtract timePref from time class starts
+        newTime = timeObj - timedelta(minutes=int(timePref[0]))
+        #Convert time back to a string
+        newTime_string = newTime.strftime('%H%M')
+
+
+
+        #Create new object to add and commit to DB
+        new_alert = Schedule(student=current_user.id, classID=classID.id, timePref=newTime_string, bus=bus, stop=stop)
+        db.session.add(new_alert)
+        db.session.commit()
+        msg = 'Successfully added alert :)'
+
+    return render_template('index.html', msg=msg, classes=classes, stops=stops, buses=activeBuses)
+
+
+#Method to preload the DB with buses, stops, and courses. Only need to be done once per semester. This should be its own python file.. but import errors :( I'll fix it soon
 def loadDB():
     url = 'http://webservices.nextbus.com/service/publicXMLFeed?a=rutgers&command=routeConfig'
     data = getDict(url)
@@ -36,6 +82,8 @@ def loadBuses(data):
         #Add all busses to the Bus table
         print route['@title']
         print route['@tag']
+
+        #Create new bus object to add into DB
         bus = Bus(name=route['@tag'], running='F')
         db.session.add(bus)
         db.session.commit()
@@ -52,7 +100,6 @@ def loadStops(data):
 
 
 
-#Method used to load all classes of a certain section into my DB. Only need to be done once per semester. This should be its own python file.. but import errors :( I'll fix it soon
 def loadSOC():
     url = 'http://sis.rutgers.edu/soc/courses.json?subject=198&semester=12017&campus=NB&level=U'
     response = urllib.urlopen(url)
@@ -114,11 +161,7 @@ def schedule(bus):
         response = urllib.urlopen(url)
         data = json.loads(response.read())
 
-        #get time to be returned and print out estimate time
-        #time = datetime.now(timezone('EST'))
-        #print time.hour
-        #print time.minute
-        #print time + timedelta(minutes = 10)
+        #wtf does this do again
         for i in data:
             if i == 'name':
                 return render_template('schedules.html', busName=bus)
@@ -147,7 +190,7 @@ def prof(number):
 
         #Send schedule to front end to be displayed
         print 'LOL WHY'
-        return render_template('profile.html', number=number, schedules=list_of_schedules)
+        return render_template('profile.html', Classes=Classes, number=number, schedules=list_of_schedules)
     if request.method == 'POST':
         return render_template('profile.html')
 
@@ -190,7 +233,7 @@ def actives():
     #update DB to switch running flag to T if it's in the activeBuses list. Else, set the running flag to F
     for u in Bus.query: #Query all bus objects from Bus table (!!! SO COOL)
         if u.name in activeBuses:
-            print '      ' + u.name
+            #print '      ' + u.name
             u.running = 'T'
             db.session.commit()
         else:

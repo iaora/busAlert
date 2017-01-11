@@ -9,14 +9,15 @@
 
 {% if schedules %}
   <div class="row">
-    <div class="col-xs-6">
       <h2>Current Alerts:</h2>
-      
-    </div>
+      <ol>
+        {% for i in schedules %}
+        <li>{{Classes.query.filter_by(id=i.id).first().courseNum + ':' + Classes.query.filter_by(id=i.id).first().sectionNum}} at {{i.timePref}}</li>
+        {% endfor %}
+      </ol>
 
-    <div class="col-xs-6">
-      <h2>Manage Alerts:</h2>
-    </div>
+      
+
   </div>
 {% else %}
   <h2>{{msg}}</h2>

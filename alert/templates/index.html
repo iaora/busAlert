@@ -1,11 +1,27 @@
 {% extends "base.html" %}
 
+{% block status %}
+  <!--Print success message -->
+  {% if msg  %}
+    <div class="alert alert-success" role="alert">
+      <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+      {{msg}}
+    </div>
+  {% elif error %}
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+      {{error}}
+    </div>
+  {% endif %}
+{% endblock %}
+
 {% block title %}RU Bus Alert{% endblock %}
 {% block header %}
   {{ super() }}
-  {% endblock %}
+{% endblock %}
 
 {% block content %}
+
 
   <!-- Header -->
   <h3>A notifier of Rutgers Bus arrivals</h3>
@@ -21,43 +37,55 @@
 
   {% if current_user.is_authenticated %}
     <hr class="intro-divider">
-    <div class="row">
       <h2>Create a new alert</h2>
-      <form>
-        <div class="form-group">
-          <label for="exampleInputEmail1">Class ID</label>
-          <input class="form-control" name="classID"  placeholder="Class ID">
-          <small id="classID" class="form-text text-muted" style="color: #fff;">Ex: 01:198:111:01 for Intro to CS section 1</small>
+      <form class="form-inline" method="POST">
+        <div class="row form-group">
+          <div class="col-sm-2">
+            <select class="form-control" name="classID">
+              <option selected>Select Class</option>
+              {% for i in classes %}
+                <option>{{i.courseNum + '.' + i.sectionNum}}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="sel1">Select Buses:</label>
-          <select class="form-control" id="sel1">
-            {% for i in buses %}
-              <option>{{i}}</option>
-            {% endfor %}
-          </select>
+        <div class="row form-group">
+          <div class="col-sm-2">
+            <select class="form-control" name="bus">
+              <option selected>Select Bus</option>
+              {% for i in buses %}
+                <option>{{i}}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="sel1">Select Stop:</label>
-          <select class="form-control" id="sel1">
-            {% for i in buses %}
-              <option>{{i}}</option>
-            {% endfor %}
-          </select>
+        <div class="row form-group">
+          <div class="col-sm-2">
+            <select class="form-control" name="stop">
+              <option selected>Select Stop</option>
+              {% for i in stops %}
+                <option>{{i.name}}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="sel1">Select Time:</label>
-          <select class="form-control" id="sel1">
-            {% for i in buses %}
-              <option>{{i}}</option>
-            {% endfor %}
-          </select>
+        <div class="row form-group">
+          <div class="col-sm-2">
+            <select class="form-control" name="time">
+                <option selected>Select Time Before</option>
+                <option>60 min</option>
+                <option>50 min</option>
+                <option>40 min</option>
+                <option>30 min</option>
+                <option>20 min</option>
+                <option>10 min</option>
+            </select>
+          </div>
         </div>
-        <button class="" style="background-color: Transparent; border: none;"  name="selection" type="submit" value="post_like">
-          <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+        <button class="btn btn-info" style=" border: none;"  name="selection" type="submit" value="">
+          <span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
         </button>
       </form>
-    </div>
   {% endif %}
 
 {% endblock %}
